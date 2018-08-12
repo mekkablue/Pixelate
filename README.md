@@ -9,7 +9,7 @@ After installation, it will add the menu item *Filter > Pixelate*. You can set a
 ### Installation
 
 1. In Glyphs, go to *Window > Plugin Manager.*
-2. Click the *Install* button next to the Pixelate entry.
+2. Click the *Install* button next to the *Pixelate* entry.
 3. Restart Glyphs.
 
 ### Usage Instructions

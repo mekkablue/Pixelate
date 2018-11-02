@@ -34,13 +34,15 @@ class Pixelate(FilterWithDialog):
 	def settings(self):
 		self.menuName = Glyphs.localize({
 			'en': u'Pixelate',
-			'de': u'Verpixeln'
+			'de': u'Verpixeln',
+			'fr': u'Pixelliser',
 		})
 		
 		# Word on Run Button (default: Apply)
 		self.actionButtonLabel = Glyphs.localize({
 			'en': u'Pixelate',
-			'de': u'Verpixeln'
+			'de': u'Verpixeln',
+			'fr': u'Pixelliser',
 		})
 		
 		# Load dialog from .nib (without .extension)

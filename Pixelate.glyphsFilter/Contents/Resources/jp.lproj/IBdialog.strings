@@ -1,0 +1,9 @@
+
+/* Class = "NSTextFieldCell"; title = "ピクセル字"; ObjectID = "dPX-2j-6DZ"; */
+"dPX-2j-6DZ.title" = "ピクセル字";
+
+/* Class = "NSTextFieldCell"; title = "ピクセル・グリッド・ステップ"; ObjectID = "m1Z-vT-qI8"; */
+"m1Z-vT-qI8.title" = "ピクセル・グリッド・ステップ";
+
+/* Class = "NSButtonCell"; title = "グリッドにスナップ"; ObjectID = "oSF-eK-zrE"; */
+"oSF-eK-zrE.title" = "グリッドにスナップ";

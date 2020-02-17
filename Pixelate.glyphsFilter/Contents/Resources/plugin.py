@@ -88,15 +88,18 @@ class Pixelate(FilterWithDialog):
 		# Called on font export, get values from customParameters
 		if customParameters.has_key('snapwidth'):
 			widthsShouldBeReset = customParameters['snapwidth']
-		if customParameters.has_key('grid'):
-			pixelRasterWidth = customParameters['grid']
-		if customParameters.has_key('component'):
-			pixelNameEntered = customParameters['component']
-		
 		# Called through UI, use stored values
 		else:
 			widthsShouldBeReset = bool(Glyphs.defaults['com.mekkablue.Pixelate.resetWidths'])
+
+		if customParameters.has_key('grid'):
+			pixelRasterWidth = customParameters['grid']
+		else:
 			pixelRasterWidth = int(Glyphs.defaults['com.mekkablue.Pixelate.pixelRasterWidth'])
+
+		if customParameters.has_key('component'):
+			pixelNameEntered = customParameters['component']
+		else:
 			pixelNameEntered = str(Glyphs.defaults['com.mekkablue.Pixelate.pixelComponentName'])
 		
 		try:
@@ -104,53 +107,67 @@ class Pixelate(FilterWithDialog):
 			thisFont = thisGlyph.parent
 			pixelRasterWidth = max(5,abs(pixelRasterWidth)) # safety precaution
 			
+			# snap width to pixel grid:
+			if widthsShouldBeReset:
+				originalWidth = thisLayer.width
+				pixelatedWidth = round( originalWidth / pixelRasterWidth ) * pixelRasterWidth
+				thisLayer.setWidth_( pixelatedWidth )
+			
+			# draw pixels
 			if thisFont and thisGlyph.name != pixelNameEntered:
 				pixel = thisFont.glyphs[ pixelNameEntered ]
-				
-				# remove existing pixel components to avoid endless iteration:
-				for i in range(len(thisLayer.components))[::-1]:
-					if thisLayer.components[i].componentName == pixelNameEntered:
-						del thisLayer.components[i]
-				
-				if len(thisLayer.paths) > 0 or len(thisLayer.components) > 0:
-					# get all possible pixel positions within layer bounds:
-					thisLayerBezierPath = thisLayer.copyDecomposedLayer().bezierPath # necessary for containsPoint_() function
-					layerBounds = thisLayer.bounds
-					xStart = int(round( layerBounds.origin.x / pixelRasterWidth ))
-					yStart = int(round( layerBounds.origin.y / pixelRasterWidth ))
-					xIterations = int(round( layerBounds.size.width / pixelRasterWidth ))
-					yIterations = int(round( layerBounds.size.height / pixelRasterWidth ))
-					pixelCount = 0
-
-					if inEditView:
-						# move current layer to background and clean foreground:
-						thisLayer.background.clear()
-						thisLayer.swapForegroundWithBackground()
-					else:
-						thisLayer.clear()
+				if pixel:
 					
-					# snap width to pixel grid:
-					if widthsShouldBeReset:
-						originalWidth = thisLayer.width
-						pixelatedWidth = round( originalWidth / pixelRasterWidth ) * pixelRasterWidth
-						thisLayer.setWidth_( pixelatedWidth )
+					# first, remove existing pixel components to avoid endless iteration:
+					for i in range(len(thisLayer.components))[::-1]:
+						if thisLayer.components[i].componentName == pixelNameEntered:
+							del thisLayer.components[i]
 				
-					# add pixels:
-					for x in range(xStart, xStart + xIterations):
-						for y in range( yStart, yStart + yIterations):
-							# if the pixel center is black, insert a pixel component here:
-							pixelCenter = NSPoint( (x+0.5) * pixelRasterWidth, (y+0.5) * pixelRasterWidth )
-							if thisLayerBezierPath.containsPoint_( pixelCenter ):
-								pixelCount += 1
-								pixelComponent = GSComponent( pixel, NSPoint( x * pixelRasterWidth, y * pixelRasterWidth ) )
-								pixelComponent.alignment = -1 # prevent automatic alignment
-								thisLayer.addComponent_( pixelComponent )
-					
-					if not inEditView:
-						thisLayer.decomposeComponents()
-						thisLayer.removeOverlap()
+					# only draw if there is a shape (left):
+					if thisLayer.paths or thisLayer.components or thisLayer.background.paths:
 
-					# print "%s: added %i pixels to layer '%s'%s." % ( thisGlyph.name, pixelCount, thisLayer.name )
+						# determine the shape
+						thisLayerBezierPath = None
+						if inEditView:
+							# move current layer to background and clean foreground:
+							if thisLayer.paths or thisLayer.components:
+								backgroundPaths = thisLayer.copyDecomposedLayer().paths.__copy__()
+								thisLayer.background.clear()
+								thisLayer.background.paths = backgroundPaths
+								
+							# alternatively, use the background from a previous iteration:
+							thisLayerBezierPath = thisLayer.background.bezierPath
+						else:
+							# when called as custom parameter:
+							thisLayerBezierPath = thisLayer.copyDecomposedLayer().bezierPath
+							thisLayer.clear()
+						
+						# continue only if there is anything:
+						if thisLayerBezierPath:
+							layerBounds = thisLayer.bounds
+							xStart = int(round( layerBounds.origin.x / pixelRasterWidth ))
+							yStart = int(round( layerBounds.origin.y / pixelRasterWidth ))
+							xIterations = int(round( layerBounds.size.width / pixelRasterWidth ))
+							yIterations = int(round( layerBounds.size.height / pixelRasterWidth ))
+							pixelCount = 0
+
+							# add pixels:
+							for x in range(xStart, xStart + xIterations):
+								for y in range( yStart, yStart + yIterations):
+									# if the pixel center is black, insert a pixel component here:
+									pixelCenter = NSPoint( (x+0.5) * pixelRasterWidth, (y+0.5) * pixelRasterWidth )
+									if thisLayerBezierPath.containsPoint_( pixelCenter ):
+										pixelCount += 1
+										pixelComponent = GSComponent( pixel, NSPoint( x * pixelRasterWidth, y * pixelRasterWidth ) )
+										pixelComponent.alignment = -1 # prevent automatic alignment
+										thisLayer.addComponent_( pixelComponent )
+							
+							# decompose if called as parameter:
+							if not inEditView:
+								thisLayer.decomposeComponents()
+								thisLayer.removeOverlap()
+
+							# print "%s: added %i pixels to layer '%s'%s." % ( thisGlyph.name, pixelCount, thisLayer.name )
 			
 		except Exception, e:
 			import traceback

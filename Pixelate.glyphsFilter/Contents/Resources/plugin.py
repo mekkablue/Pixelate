@@ -1,4 +1,5 @@
 # encoding: utf-8
+from __future__ import division, print_function, unicode_literals
 
 ###########################################################################################################
 #
@@ -30,7 +31,7 @@ class Pixelate(FilterWithDialog):
 	pixelRasterWidthField = objc.IBOutlet()
 	resetWidthsField = objc.IBOutlet()
 	
-	
+	@objc.python_method
 	def settings(self):
 		self.menuName = Glyphs.localize({
 			'en': u'Pixelate',
@@ -51,6 +52,7 @@ class Pixelate(FilterWithDialog):
 		self.loadNib('IBdialog', __file__)
 	
 	# On dialog show
+	@objc.python_method
 	def start(self):
 		
 		# Set default value
@@ -83,6 +85,7 @@ class Pixelate(FilterWithDialog):
 		self.update()
 	
 	# Actual filter
+	@objc.python_method
 	def filter(self, thisLayer, inEditView, customParameters):
 		
 		# Called on font export, get values from customParameters
@@ -133,7 +136,11 @@ class Pixelate(FilterWithDialog):
 							if thisLayer.paths or thisLayer.components:
 								backgroundPaths = thisLayer.copyDecomposedLayer().paths.__copy__()
 								thisLayer.background.clear()
-								thisLayer.background.paths = backgroundPaths
+								try:
+									for backgroundPath in backgroundPaths:
+										thisLayer.background.shapes.append(backgroundPath)
+								except:
+									thisLayer.background.paths = backgroundPaths
 								
 							# alternatively, use the background from a previous iteration:
 							thisLayerBezierPath = thisLayer.background.bezierPath
@@ -180,7 +187,7 @@ class Pixelate(FilterWithDialog):
 				Glyphs.showMacroWindow()
 				print errorMsg
 			
-	
+	@objc.python_method
 	def generateCustomParameter( self ):
 		return "%s; grid:%s; component:%s; snapwidth:%s" % (
 			self.__class__.__name__, 
@@ -189,6 +196,7 @@ class Pixelate(FilterWithDialog):
 			Glyphs.defaults["com.mekkablue.Pixelate.resetWidths"],
 			)
 	
+	@objc.python_method
 	def __file__(self):
 		"""Please leave this method unchanged"""
 		return __file__

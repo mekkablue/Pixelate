@@ -89,18 +89,18 @@ class Pixelate(FilterWithDialog):
 	def filter(self, thisLayer, inEditView, customParameters):
 		
 		# Called on font export, get values from customParameters
-		if customParameters.has_key('snapwidth'):
+		if 'snapwidth' in customParameters:
 			widthsShouldBeReset = customParameters['snapwidth']
 		# Called through UI, use stored values
 		else:
 			widthsShouldBeReset = bool(Glyphs.defaults['com.mekkablue.Pixelate.resetWidths'])
 
-		if customParameters.has_key('grid'):
+		if 'grid' in customParameters:
 			pixelRasterWidth = customParameters['grid']
 		else:
 			pixelRasterWidth = int(Glyphs.defaults['com.mekkablue.Pixelate.pixelRasterWidth'])
 
-		if customParameters.has_key('component'):
+		if 'component' in customParameters:
 			pixelNameEntered = customParameters['component']
 		else:
 			pixelNameEntered = str(Glyphs.defaults['com.mekkablue.Pixelate.pixelComponentName'])
@@ -174,9 +174,7 @@ class Pixelate(FilterWithDialog):
 								thisLayer.decomposeComponents()
 								thisLayer.removeOverlap()
 
-							# print "%s: added %i pixels to layer '%s'%s." % ( thisGlyph.name, pixelCount, thisLayer.name )
-			
-		except Exception, e:
+		except Exception as e:
 			import traceback
 			t = str(traceback.format_exc())
 			errorMsg = "Pixelate Error: %s\n%s" % (e, t)
@@ -185,7 +183,7 @@ class Pixelate(FilterWithDialog):
 			# brings macro window to front and reports error:
 			if inEditView:
 				Glyphs.showMacroWindow()
-				print errorMsg
+				print(errorMsg)
 			
 	@objc.python_method
 	def generateCustomParameter( self ):

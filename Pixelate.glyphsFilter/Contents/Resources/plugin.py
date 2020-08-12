@@ -90,20 +90,20 @@ class Pixelate(FilterWithDialog):
 		
 		# Called on font export, get values from customParameters
 		if 'snapwidth' in customParameters:
-			widthsShouldBeReset = customParameters['snapwidth']
+			widthsShouldBeReset = bool(customParameters['snapwidth'])
 		# Called through UI, use stored values
 		else:
 			widthsShouldBeReset = bool(Glyphs.defaults['com.mekkablue.Pixelate.resetWidths'])
 
 		if 'grid' in customParameters:
-			pixelRasterWidth = customParameters['grid']
+			pixelRasterWidth = int(customParameters['grid'])
 		else:
 			pixelRasterWidth = int(Glyphs.defaults['com.mekkablue.Pixelate.pixelRasterWidth'])
 
 		if 'component' in customParameters:
-			pixelNameEntered = customParameters['component']
+			pixelNameEntered = customParameters['component'].strip()
 		else:
-			pixelNameEntered = str(Glyphs.defaults['com.mekkablue.Pixelate.pixelComponentName'])
+			pixelNameEntered = Glyphs.defaults['com.mekkablue.Pixelate.pixelComponentName'].strip()
 		
 		try:
 			thisGlyph = thisLayer.parent
@@ -114,13 +114,12 @@ class Pixelate(FilterWithDialog):
 			if widthsShouldBeReset:
 				originalWidth = thisLayer.width
 				pixelatedWidth = round( originalWidth / pixelRasterWidth ) * pixelRasterWidth
-				thisLayer.setWidth_( pixelatedWidth )
+				thisLayer.width = pixelatedWidth
 			
 			# draw pixels
 			if thisFont and thisGlyph.name != pixelNameEntered:
 				pixel = thisFont.glyphs[ pixelNameEntered ]
 				if pixel:
-					
 					# first, remove existing pixel components to avoid endless iteration:
 					for i in range(len(thisLayer.components))[::-1]:
 						if thisLayer.components[i].componentName == pixelNameEntered:
@@ -128,12 +127,11 @@ class Pixelate(FilterWithDialog):
 				
 					# only draw if there is a shape (left):
 					if thisLayer.paths or thisLayer.components or thisLayer.background.paths:
-
 						# determine the shape
 						thisLayerBezierPath = None
 						if inEditView:
-							# move current layer to background and clean foreground:
 							if thisLayer.paths or thisLayer.components:
+								# move current layer to background and clean foreground:
 								backgroundPaths = thisLayer.copyDecomposedLayer().paths.__copy__()
 								thisLayer.background.clear()
 								try:
@@ -141,17 +139,21 @@ class Pixelate(FilterWithDialog):
 										thisLayer.background.shapes.append(backgroundPath)
 								except:
 									thisLayer.background.paths = backgroundPaths
-								
-							# alternatively, use the background from a previous iteration:
+
+							# use the background as reference
+							# either from a previous iteration
+							# or from the foreground > background conversion above
 							thisLayerBezierPath = thisLayer.background.bezierPath
 						else:
 							# when called as custom parameter:
 							thisLayerBezierPath = thisLayer.copyDecomposedLayer().bezierPath
-							thisLayer.clear()
+						
+						# clean out foreground to make room for the pixels:
+						thisLayer.clear()
 						
 						# continue only if there is anything:
 						if thisLayerBezierPath:
-							layerBounds = thisLayer.bounds
+							layerBounds = thisLayerBezierPath.bounds()
 							xStart = int(round( layerBounds.origin.x / pixelRasterWidth ))
 							yStart = int(round( layerBounds.origin.y / pixelRasterWidth ))
 							xIterations = int(round( layerBounds.size.width / pixelRasterWidth ))

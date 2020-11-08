@@ -117,64 +117,71 @@ class Pixelate(FilterWithDialog):
 				thisLayer.width = pixelatedWidth
 			
 			# draw pixels
-			if thisFont and thisGlyph.name != pixelNameEntered:
-				pixel = thisFont.glyphs[ pixelNameEntered ]
-				if pixel:
-					# first, remove existing pixel components to avoid endless iteration:
-					for i in range(len(thisLayer.components))[::-1]:
-						if thisLayer.components[i].componentName == pixelNameEntered:
-							del thisLayer.components[i]
+			if not thisFont:
+				print("⚠️ No font open for pixelating.")
+			else:
+				if thisGlyph.name == pixelNameEntered:
+					print("⚠️ Cannot pixelate ‘%s’ with itself." % pixelNameEntered)
+				else:
+					pixel = thisFont.glyphs[ pixelNameEntered ]
+					if not pixel and inEditView:
+						print("⚠️ Cannot pixelate: no pixel glyph named ‘%s’ found in font." % pixelNameEntered)
+					else:
+						# first, remove existing pixel components to avoid endless iteration:
+						for i in range(len(thisLayer.components))[::-1]:
+							if thisLayer.components[i].componentName == pixelNameEntered:
+								del thisLayer.components[i]
 				
-					# only draw if there is a shape (left):
-					if thisLayer.paths or thisLayer.components or thisLayer.background.paths:
-						# determine the shape
-						thisLayerBezierPath = None
-						if inEditView:
-							if thisLayer.paths or thisLayer.components:
-								# move current layer to background and clean foreground:
-								backgroundPaths = thisLayer.copyDecomposedLayer().paths.__copy__()
-								thisLayer.background.clear()
-								try:
-									for backgroundPath in backgroundPaths:
-										thisLayer.background.shapes.append(backgroundPath)
-								except:
-									thisLayer.background.paths = backgroundPaths
+						# only draw if there is a shape (left):
+						if thisLayer.paths or thisLayer.components or thisLayer.background.paths:
+							# determine the shape
+							thisLayerBezierPath = None
+							if inEditView:
+								if thisLayer.paths or thisLayer.components:
+									# move current layer to background and clean foreground:
+									backgroundPaths = thisLayer.copyDecomposedLayer().paths.__copy__()
+									thisLayer.background.clear()
+									try:
+										for backgroundPath in backgroundPaths:
+											thisLayer.background.shapes.append(backgroundPath)
+									except:
+										thisLayer.background.paths = backgroundPaths
 
-							# use the background as reference
-							# either from a previous iteration
-							# or from the foreground > background conversion above
-							thisLayerBezierPath = thisLayer.background.bezierPath
-						else:
-							# when called as custom parameter:
-							thisLayerBezierPath = thisLayer.copyDecomposedLayer().bezierPath
+								# use the background as reference
+								# either from a previous iteration
+								# or from the foreground > background conversion above
+								thisLayerBezierPath = thisLayer.background.bezierPath
+							else:
+								# when called as custom parameter:
+								thisLayerBezierPath = thisLayer.copyDecomposedLayer().bezierPath
 						
-						# clean out foreground to make room for the pixels:
-						thisLayer.clear()
+							# clean out foreground to make room for the pixels:
+							thisLayer.clear()
 						
-						# continue only if there is anything:
-						if thisLayerBezierPath:
-							layerBounds = thisLayerBezierPath.bounds()
-							xStart = int(round( layerBounds.origin.x / pixelRasterWidth ))
-							yStart = int(round( layerBounds.origin.y / pixelRasterWidth ))
-							xIterations = int(round( layerBounds.size.width / pixelRasterWidth ))
-							yIterations = int(round( layerBounds.size.height / pixelRasterWidth ))
-							pixelCount = 0
+							# continue only if there is anything:
+							if thisLayerBezierPath:
+								layerBounds = thisLayerBezierPath.bounds()
+								xStart = int(round( layerBounds.origin.x / pixelRasterWidth ))
+								yStart = int(round( layerBounds.origin.y / pixelRasterWidth ))
+								xIterations = int(round( layerBounds.size.width / pixelRasterWidth ))
+								yIterations = int(round( layerBounds.size.height / pixelRasterWidth ))
+								pixelCount = 0
 
-							# add pixels:
-							for x in range(xStart, xStart + xIterations):
-								for y in range( yStart, yStart + yIterations):
-									# if the pixel center is black, insert a pixel component here:
-									pixelCenter = NSPoint( (x+0.5) * pixelRasterWidth, (y+0.5) * pixelRasterWidth )
-									if thisLayerBezierPath.containsPoint_( pixelCenter ):
-										pixelCount += 1
-										pixelComponent = GSComponent( pixel, NSPoint( x * pixelRasterWidth, y * pixelRasterWidth ) )
-										pixelComponent.alignment = -1 # prevent automatic alignment
-										thisLayer.addComponent_( pixelComponent )
+								# add pixels:
+								for x in range(xStart, xStart + xIterations):
+									for y in range( yStart, yStart + yIterations):
+										# if the pixel center is black, insert a pixel component here:
+										pixelCenter = NSPoint( (x+0.5) * pixelRasterWidth, (y+0.5) * pixelRasterWidth )
+										if thisLayerBezierPath.containsPoint_( pixelCenter ):
+											pixelCount += 1
+											pixelComponent = GSComponent( pixel, NSPoint( x * pixelRasterWidth, y * pixelRasterWidth ) )
+											pixelComponent.alignment = -1 # prevent automatic alignment
+											thisLayer.addComponent_( pixelComponent )
 							
-							# decompose if called as parameter:
-							if not inEditView:
-								thisLayer.decomposeComponents()
-								thisLayer.removeOverlap()
+								# decompose if called as parameter:
+								if not inEditView:
+									thisLayer.decomposeComponents()
+									thisLayer.removeOverlap()
 
 		except Exception as e:
 			import traceback

@@ -13,15 +13,15 @@
 	<key>CFBundleName</key>
 	<string>Pixelate</string>
 	<key>CFBundleVersion</key>
-	<string>7</string>
+	<string>8</string>
 	<key>CFBundleShortVersionString</key>
-	<string>2.0.2</string>
+	<string>2.0.3</string>
 	<key>UpdateFeedURL</key>
 	<string>https://raw.githubusercontent.com/mekkablue/Pixelate/master/Pixelate.glyphsFilter/Contents/Info.plist</string>
 	<key>productPageURL</key>
 	<string>https://github.com/mekkablue/Pixelate</string>
 	<key>productReleaseNotes</key>
-	<string>Fixed issue where pixels would not end up in exported font. Thx @jeremynelson42.</string>
+	<string>Added error messaging in Macro Window.</string>
 	<key>NSHumanReadableCopyright</key>
 	<string>Copyright, Rainer Erich Scheichelbauer, 2018</string>
 	<key>NSPrincipalClass</key>

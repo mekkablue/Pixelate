@@ -118,14 +118,14 @@ class Pixelate(FilterWithDialog):
 			
 			# draw pixels
 			if not thisFont:
-				print("⚠️ No font open for pixelating.")
+				print("⚠️ Pixelate Error: No font open for pixelating.")
 			else:
 				if thisGlyph.name == pixelNameEntered:
-					print("⚠️ Cannot pixelate ‘%s’ with itself." % pixelNameEntered)
+					print("⚠️ Pixelate Error: Cannot pixelate ‘%s’ with itself." % pixelNameEntered)
 				else:
 					pixel = thisFont.glyphs[ pixelNameEntered ]
 					if not pixel and inEditView:
-						print("⚠️ Cannot pixelate: no pixel glyph named ‘%s’ found in font." % pixelNameEntered)
+						print("⚠️ Pixelate Error: No pixel glyph named ‘%s’ found in font." % pixelNameEntered)
 					else:
 						# first, remove existing pixel components to avoid endless iteration:
 						for i in range(len(thisLayer.components))[::-1]:

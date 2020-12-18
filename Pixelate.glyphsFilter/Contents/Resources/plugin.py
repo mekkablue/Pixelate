@@ -139,7 +139,13 @@ class Pixelate(FilterWithDialog):
 							if inEditView:
 								if thisLayer.paths or thisLayer.components:
 									# move current layer to background and clean foreground:
-									backgroundPaths = thisLayer.copyDecomposedLayer().paths.__copy__()
+									try:
+										# GLYPHS 3
+										backgroundPaths = thisLayer.copyDecomposedLayer().shapes.__copy__()
+									except:
+										# GLYPHS 2
+										backgroundPaths = thisLayer.copyDecomposedLayer().paths.__copy__()
+									
 									thisLayer.background.clear()
 									try:
 										for backgroundPath in backgroundPaths:
@@ -176,7 +182,7 @@ class Pixelate(FilterWithDialog):
 											pixelCount += 1
 											pixelComponent = GSComponent( pixel, NSPoint( x * pixelRasterWidth, y * pixelRasterWidth ) )
 											pixelComponent.alignment = -1 # prevent automatic alignment
-											thisLayer.addComponent_( pixelComponent )
+											thisLayer.components.append( pixelComponent )
 							
 								# decompose if called as parameter:
 								if not inEditView:

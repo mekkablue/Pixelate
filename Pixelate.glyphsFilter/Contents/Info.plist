@@ -12,16 +12,10 @@
 	<string>6.0</string>
 	<key>CFBundleName</key>
 	<string>Pixelate</string>
-	<key>CFBundleVersion</key>
-	<string>9</string>
 	<key>CFBundleShortVersionString</key>
-	<string>2.0.4</string>
-	<key>UpdateFeedURL</key>
-	<string>https://raw.githubusercontent.com/mekkablue/Pixelate/master/Pixelate.glyphsFilter/Contents/Info.plist</string>
-	<key>productPageURL</key>
-	<string>https://github.com/mekkablue/Pixelate</string>
-	<key>productReleaseNotes</key>
-	<string>Update for Glyphs 3.</string>
+	<string>2.0.5</string>
+	<key>CFBundleVersion</key>
+	<string>10</string>
 	<key>NSHumanReadableCopyright</key>
 	<string>Copyright, Rainer Erich Scheichelbauer, 2018</string>
 	<key>NSPrincipalClass</key>
@@ -30,5 +24,11 @@
 	<array>
 		<string>plugin.py</string>
 	</array>
+	<key>UpdateFeedURL</key>
+	<string>https://raw.githubusercontent.com/mekkablue/Pixelate/master/Pixelate.glyphsFilter/Contents/Info.plist</string>
+	<key>productPageURL</key>
+	<string>https://github.com/mekkablue/Pixelate</string>
+	<key>productReleaseNotes</key>
+	<string>update binary files for Glyphs3</string>
 </dict>
 </plist>

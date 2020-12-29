@@ -127,6 +127,7 @@ class Pixelate(FilterWithDialog):
 					if not pixel and inEditView:
 						print("⚠️ Pixelate Error: No pixel glyph named ‘%s’ found in font." % pixelNameEntered)
 					else:
+						thisLayer.beginChanges()
 						# first, remove existing pixel components to avoid endless iteration:
 						for i in range(len(thisLayer.components))[::-1]:
 							if thisLayer.components[i].componentName == pixelNameEntered:
@@ -160,12 +161,15 @@ class Pixelate(FilterWithDialog):
 							else:
 								# when called as custom parameter:
 								thisLayerBezierPath = thisLayer.copyDecomposedLayer().bezierPath
-						
-							# clean out foreground to make room for the pixels:
-							thisLayer.clear()
+							
 						
 							# continue only if there is anything:
 							if thisLayerBezierPath:
+								
+								# clean out foreground to make room for the pixels:
+								
+								components = []
+								
 								layerBounds = thisLayerBezierPath.bounds()
 								xStart = int(round( layerBounds.origin.x / pixelRasterWidth ))
 								yStart = int(round( layerBounds.origin.y / pixelRasterWidth ))
@@ -182,12 +186,18 @@ class Pixelate(FilterWithDialog):
 											pixelCount += 1
 											pixelComponent = GSComponent( pixel, NSPoint( x * pixelRasterWidth, y * pixelRasterWidth ) )
 											pixelComponent.alignment = -1 # prevent automatic alignment
-											thisLayer.components.append( pixelComponent )
-							
+											components.append( pixelComponent )
+								if Glyphs.versionNumber >= 3:
+									thisLayer.shapes = components
+								else:
+									thisLayer.components = components
+									thisLayer.paths = None
+								
 								# decompose if called as parameter:
 								if not inEditView:
 									thisLayer.decomposeComponents()
 									thisLayer.removeOverlap()
+						thisLayer.endChanges()
 
 		except Exception as e:
 			import traceback

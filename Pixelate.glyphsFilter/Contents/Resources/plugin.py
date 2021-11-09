@@ -38,6 +38,7 @@ class Pixelate(FilterWithDialog):
 			'de': u'Verpixeln',
 			'fr': u'Pixelliser',
 			'es': u'Pixelar',
+			'jp': u'ピクセレート',
 		})
 		
 		# Word on Run Button (default: Apply)
@@ -46,6 +47,7 @@ class Pixelate(FilterWithDialog):
 			'de': u'Verpixeln',
 			'fr': u'Pixelliser',
 			'es': u'Pixelar',
+			'jp': u'ピクセレート',
 		})
 		
 		# Load dialog from .nib (without .extension)
